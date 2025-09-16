@@ -1,0 +1,14 @@
+config {
+  type: "table",
+  dependencies: ["transactions_cleaned"]
+}
+
+SELECT
+  transaction_id,
+  transaction_timestamp,
+  user_country,
+  cleaned_amount AS reportable_amount
+FROM
+  ${ref("transactions_cleaned")}
+WHERE
+  cleaned_amount >= 10000 -- Example: Report transactions over a certain threshold

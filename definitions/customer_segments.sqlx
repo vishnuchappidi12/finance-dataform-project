@@ -1,0 +1,33 @@
+config {
+  type: "table",
+  dependencies: [
+    "transactions_cleaned",
+    "customer_ratings_raw"
+  ]
+}
+
+WITH customer_spending AS (
+  SELECT
+    user_id,
+    SUM(cleaned_amount) AS total_lifetime_spend
+  FROM
+    ${ref("transactions_cleaned")}
+  GROUP BY
+    user_id
+)
+
+SELECT
+  cs.user_id,
+  cs.total_lifetime_spend,
+  cr.customer_rating,
+  CASE
+    WHEN cs.total_lifetime_spend > 1000 AND cr.customer_rating >= 4 THEN 'High-Value & Happy'
+    WHEN cs.total_lifetime_spend > 500 AND cr.customer_rating >= 3 THEN 'Mid-Tier & Content'
+    WHEN cs.total_lifetime_spend <= 500 AND cr.customer_rating < 3 THEN 'Low-Value & At-Risk'
+    ELSE 'Other'
+  END AS customer_segment
+FROM
+  customer_spending AS cs
+LEFT JOIN
+  ${ref("customer_ratings_raw")} AS cr
+  ON cs.user_id = cr.user_id

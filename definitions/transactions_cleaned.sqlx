@@ -1,0 +1,41 @@
+config {
+  type: "table",
+  dependencies: [
+    "finance_analytics.transactions_raw",
+    "finance_analytics.users_raw",
+    "finance_analytics.merchants_raw",
+    "finance_analytics.fraud_flags_raw"
+  ]
+}
+
+SELECT
+  t.transaction_id,
+  t.user_id,
+  t.amount,
+  t.transaction_timestamp,
+  t.currency,
+  u.user_country,
+  u.registration_date,
+  m.merchant_category,
+  CASE
+    WHEN f.user_id IS NOT NULL THEN TRUE
+    ELSE FALSE
+  END AS is_flagged_for_fraud,
+  -- Data cleaning: Ensure amounts are positive
+  CASE
+    WHEN t.amount <= 0 THEN NULL
+    ELSE t.amount
+  END AS cleaned_amount
+FROM
+  `virtual-ego-471706-k3.finance_analytics.transactions_raw` AS t
+LEFT JOIN
+  `virtual-ego-471706-k3.finance_analytics.users_raw` AS u
+  ON t.user_id = u.user_id
+LEFT JOIN
+  `virtual-ego-471706-k3.finance_analytics.merchants_raw` AS m
+  ON t.merchant_id = m.merchant_id
+LEFT JOIN
+  `virtual-ego-471706-k3.finance_analytics.fraud_flags_raw` AS f
+  ON t.user_id = f.user_id
+WHERE
+  t.currency = 'USD'

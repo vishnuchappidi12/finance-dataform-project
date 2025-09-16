@@ -1,0 +1,4 @@
+defaultProject: virtual-ego-471706-k3
+defaultDataset: finance_clean
+defaultAssertionDataset: finance_clean_assertions
+dataformCoreVersion: 3.0.26

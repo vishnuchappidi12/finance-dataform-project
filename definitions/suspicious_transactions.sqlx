@@ -1,0 +1,17 @@
+config {
+  type: "table",
+  dependencies: ["transactions_cleaned"]
+}
+
+SELECT
+  transaction_id,
+  user_id,
+  amount,
+  transaction_timestamp,
+  user_country,
+  merchant_category,
+  'Flagged in initial fraud table' AS reason
+FROM
+  ${ref("transactions_cleaned")}
+WHERE
+  is_flagged_for_fraud IS TRUE

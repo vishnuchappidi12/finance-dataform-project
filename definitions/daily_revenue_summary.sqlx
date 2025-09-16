@@ -1,0 +1,15 @@
+config {
+  type: "table",
+  dependencies: ["transactions_cleaned"]
+}
+
+SELECT
+  DATE(transaction_timestamp) AS transaction_date,
+  SUM(cleaned_amount) AS daily_revenue,
+  COUNT(transaction_id) AS total_transactions
+FROM
+  ${ref("transactions_cleaned")}
+GROUP BY
+  1
+ORDER BY
+  1

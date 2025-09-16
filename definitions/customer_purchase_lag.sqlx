@@ -1,0 +1,39 @@
+config {
+  type: "table",
+  dependencies: [
+    "transactions_cleaned",
+    "app_events_raw"
+  ]
+}
+
+WITH purchase_events AS (
+  SELECT
+    t.user_id,
+    t.transaction_timestamp
+  FROM
+    ${ref("transactions_cleaned")} AS t
+  INNER JOIN
+    ${ref("app_events_raw")} AS ae
+    ON t.user_id = ae.user_id AND t.transaction_timestamp = ae.event_timestamp
+  WHERE
+    ae.event_type = 'purchase'
+),
+
+lagged_purchases AS (
+  SELECT
+    user_id,
+    transaction_timestamp,
+    LEAD(transaction_timestamp) OVER(PARTITION BY user_id ORDER BY transaction_timestamp) AS next_purchase_timestamp
+  FROM
+    purchase_events
+)
+
+SELECT
+  user_id,
+  transaction_timestamp,
+  next_purchase_timestamp,
+  TIMESTAMP_DIFF(next_purchase_timestamp, transaction_timestamp, HOUR) AS hours_to_next_purchase
+FROM
+  lagged_purchases
+WHERE
+  next_purchase_timestamp IS NOT NULL
