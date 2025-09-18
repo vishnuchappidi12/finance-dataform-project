@@ -5,7 +5,7 @@ config {
     "app_events_raw"
   ]
 }
-
+--the acutal core sql logic starts from here--
 WITH purchase_events AS (
   SELECT
     t.user_id,
