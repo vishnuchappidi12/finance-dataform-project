@@ -5,12 +5,12 @@ config {
     "app_events_raw"
   ]
 }
-
+--the acutal core sql logic starts from here--
 WITH purchase_events AS (
   SELECT
     t.user_id,
     t.transaction_timestamp
-  FROM
+  from
     ${ref("transactions_cleaned")} AS t
   INNER JOIN
     ${ref("app_events_raw")} AS ae
@@ -36,4 +36,5 @@ SELECT
 FROM
   lagged_purchases
 WHERE
+
   next_purchase_timestamp IS NOT NULL

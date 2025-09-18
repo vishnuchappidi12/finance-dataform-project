@@ -1,11 +1,24 @@
 config {
   type: "table",
   dependencies: [
-    "finance_analytics.transactions_raw",
-    "finance_analytics.users_raw",
-    "finance_analytics.merchants_raw",
-    "finance_analytics.fraud_flags_raw"
-  ]
+    "transactions_raw",
+    "users_raw",
+    "merchants_raw",
+    "fraud_flags_raw"
+  ],
+  description: "A unified view of transactions, users, merchants, and fraud flags. It combines raw data and applies initial cleaning.",
+  columns: {
+    transaction_id: "The unique identifier for each transaction.",
+    user_id: "The unique identifier for the user who made the transaction.",
+    amount: "The raw transaction amount.",
+    transaction_timestamp: "The exact timestamp of the transaction.",
+    currency: "The currency of the transaction (e.g., 'USD').",
+    user_country: "The country where the user is located, derived from the users_raw table.",
+    registration_date: "The date the user registered.",
+    merchant_category: "The category of the merchant, derived from the merchants_raw table.",
+    is_flagged_for_fraud: "A flag indicating if the user is in the known fraud list.",
+    cleaned_amount: "The transaction amount, with all invalid values (zero or negative) removed."
+  }
 }
 
 SELECT
@@ -21,7 +34,6 @@ SELECT
     WHEN f.user_id IS NOT NULL THEN TRUE
     ELSE FALSE
   END AS is_flagged_for_fraud,
-  -- Data cleaning: Ensure amounts are positive
   CASE
     WHEN t.amount <= 0 THEN NULL
     ELSE t.amount
